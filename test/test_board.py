@@ -1,6 +1,12 @@
 from colorama import init, Fore, Style
 
-from othello_board import OthelloBoard
+import sys
+import os
+
+# Add the parent directory to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from src.board.othello_board import OthelloBoard
 
 # Initialize colorama
 init(autoreset=True)

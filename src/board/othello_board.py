@@ -118,8 +118,12 @@ class OthelloBoard:
                         c += dc
         return board
 
+    def is_game_over(self):
+        return np.all((self.board == 1) | (self.board == 2))
+    
+    
     def check_game_over(self):
-        if np.all((self.board != 0) | (self.board == 3)):
+        if self.is_game_over():
             result = self._calculate_winner()
             if result == 0:
                 self.winner = 0
@@ -127,6 +131,7 @@ class OthelloBoard:
                 self.winner = -1  # Opponent won
             else:
                 self.winner = 1   # Current player won
+            
 
     def _calculate_winner(self):
         white_count = np.count_nonzero(self.board == 1)

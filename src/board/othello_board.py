@@ -2,14 +2,16 @@ import numpy as np
 from colorama import Fore, Style
 
 class OthelloBoard:
-    def __init__(self, size=8):
+    def __init__(self, size=8,board = None, turn = None, winner = None):
         if size % 2 != 0:
             raise ValueError("Board size must be even.")
         self.size = size
-        self.board = np.zeros((size, size), dtype=int)
-        self.turn = 1  # 1 for white, 2 for black
-        self.winner = 0
-        self._initialize_starting_position()
+        self.board = board if board is not None else np.zeros((size, size), dtype=int)
+        self.turn = turn if turn else 2  # 1 for white, 2 for black
+        self.winner = winner if winner else 0
+        if board is  None:
+            self._initialize_starting_position()
+
         self.update_available_moves()
 
     def __str__(self):
@@ -20,7 +22,7 @@ class OthelloBoard:
 
     def reset_board(self):
         self.board.fill(0)
-        self.turn = 1
+        self.turn = 2
         self.winner = 0
         self._initialize_starting_position()
         self.update_available_moves()
@@ -121,7 +123,7 @@ class OthelloBoard:
     def is_game_over(self):
         return np.all((self.board == 1) | (self.board == 2))
     
-    
+
     def check_game_over(self):
         if self.is_game_over():
             result = self._calculate_winner()

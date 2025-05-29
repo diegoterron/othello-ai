@@ -12,6 +12,6 @@ if __name__ == "__main__":
                 print("Exiting without generating data.")
                 exit(0)
 
-    data = generate_data(num_games=100,UCT_depth=20)
+    data = generate_data(num_games=1000,UCT_depth=20)
     save_data(data, filename=FILENAME)
     

@@ -8,7 +8,7 @@ class OthelloBoard:
         self.size = size
         self.board = board if board is not None else np.zeros((size, size), dtype=int)
         self.turn = turn if turn else 2  # 1 for white, 2 for black
-        self.winner = winner if winner else 0
+        self.winner = winner if winner else None
         if board is  None:
             self._initialize_starting_position()
 
@@ -121,7 +121,7 @@ class OthelloBoard:
         return board
 
     def is_game_over(self):
-        return np.all((self.board == 1) | (self.board == 2))
+        return not np.any(self.board == 3)
     
 
     def check_game_over(self):

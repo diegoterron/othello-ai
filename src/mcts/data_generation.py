@@ -1,3 +1,9 @@
+import sys
+import os
+
+# Add the parent directory to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
 import numpy as np
 from src.board.othello_board import OthelloBoard
 from src.mcts.UCT_tree import Node
@@ -15,10 +21,11 @@ def _generate_data(root,data):
         return acum #returns the acumulated labels to add them to the father node
     else: # Leaf node, no children
         root.board.check_game_over() #Updates the winner of the game
+        print(f"Leaf node reached with winner: {root.board.get_winner()}")
         data.append((root.board, root.board.get_winner()))  # Add the board and its winner to the data
         return [root.board.get_winner()] #return a 1 element list to be added to the father acum.
 
-def generate_data(num_samples=100):
+def generate_data(num_samples=100,UCT_depth=1000):
     """
     Generate training data for the Othello game using MCTS.
     num_samples: Number of samples to generate.
@@ -26,7 +33,7 @@ def generate_data(num_samples=100):
     """
     model = keras.models.load_model(MODEL_PATH)
     data = []
-
+    print("Model loaded. Generating data...")
     for _ in range(num_samples):
         board = OthelloBoard()
         node = Node(board, model=model)

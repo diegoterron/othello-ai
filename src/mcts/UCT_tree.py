@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.board.othello_board import OthelloBoard
 
 
-EXPLORATION_WEIGHT = 0.7
+EXPLORATION_WEIGHT = 0.5
 NITER = 1000  # Number of iterations for UCT search
 
 class Node():
@@ -70,17 +70,31 @@ class Node():
 
         new_board_state = self.board.simulate_move(self.board.board ,selected_move[0], selected_move[1],self.board.get_turn())
         new_board = OthelloBoard(board=new_board_state, turn=1 if self.board.get_turn() == 2 else 2)
-        new_node = Node(new_board, parent=self, in_action=selected_move)
+        new_node = Node(new_board, parent=self, in_action=selected_move, model=self.model)
         self.children.append(new_node)
         return new_node
     
     def default_policy(self):
         """
-        Use a neural network to evaluate the board state or return a random value.
+        Use a neural network to evaluate the board state or return a random value. If no Neural Network is provided, use the traditional default policy implementation
         """
         if self.model is not None:
-            return self.model.predict(self.board.board)
-        return np.random.rand()
+            return self.model.predict(np.expand_dims(self.board.get_board(), axis=0),verbose = 0)[0][0]
+        else:
+            current_board = OthelloBoard(board=self.board.board, turn=self.board.get_turn())
+            while current_board.is_game_over() is False:
+                available_moves = current_board.get_available_moves()
+                if not available_moves:
+                    new_board = OthelloBoard(board=current_board, turn=1 if current_board.get_turn() == 2 else 2)
+                else:
+                    move = available_moves[np.random.choice([i for i,_ in enumerate(available_moves)])]
+                    new_board_state = current_board.simulate_move(current_board.board, move[0], move[1], current_board.get_turn())
+                    new_board = OthelloBoard(board=new_board_state, turn=1 if current_board.get_turn() == 2 else 2)
+                current_board = new_board
+            current_board.check_game_over()
+            return current_board.get_winner()
+
+
     
     def backup(self, reward):
         current_node = self

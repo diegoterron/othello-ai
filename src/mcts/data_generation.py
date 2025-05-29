@@ -11,37 +11,32 @@ from tensorflow import keras
 
 MODEL_PATH = 'models/untrained_model.keras'
 
-def _generate_data(root,data):
-    if root.children:
-        acum = [] #Create an acum for each no-leaf node 
-        for child in root.children: #For each childrenof the node
-            acum += _generate_data(child,data) #recursively generates the labels
-        data.extend([(root.board,winner) for winner in acum]) 
-        """Adds a pair (node,label) to the data. If the board is in a draw position, the list will most likely have roughly the same number of 1s and -1s, so it will be a balanced dataset. Else, it will have a lot of 1s or -1s, depending on the winner. This is desirable because it will help the model to learn to predict the winner of the game from an early state."""
-        return acum #returns the acumulated labels to add them to the father node
-    else: # Leaf node, no children
-        root.board.check_game_over() #Updates the winner of the game
-        print(f"Leaf node reached with winner: {root.board.get_winner()}")
-        data.append((root.board, root.board.get_winner()))  # Add the board and its winner to the data
-        return [root.board.get_winner()] #return a 1 element list to be added to the father acum.
-
-def generate_data(num_samples=100,UCT_depth=1000):
+def generate_data(num_games=100,UCT_depth=100,useModel=False):
     """
     Generate training data for the Othello game using MCTS.
-    num_samples: Number of samples to generate.
+    num_games: Number of samples to generate.
     Returns a list of tuples (board,winner).
     """
-    model = keras.models.load_model(MODEL_PATH)
+    model = keras.models.load_model(MODEL_PATH) if useModel else None
     data = []
-    print("Model loaded. Generating data...")
-    for _ in range(num_samples):
+    print(f'Model {"loaded" if useModel else "usage is not active"}. Generating data...')
+    for _ in range(num_games):
         board = OthelloBoard()
+        acum= []
         node = Node(board, model=model)
 
         # Perform MCTS to get a sample tree
-        node.UCT_search(1000)  
-
-        _generate_data(node, data)
+        while node.board.is_game_over() is False:
+            bestChild = node.UCT_search(UCT_depth)
+            if bestChild is None: ## The player has no legal moves
+                board = OthelloBoard(board=node.board.board, turn=1 if node.board.get_turn() == 2 else 2) 
+                node = Node(board, parent=node, in_action=None, model=model)
+            else:
+                node = bestChild
+                acum.append(node.board.board)  # Store the board state for this node
+        node.board.check_game_over()
+        print(f"Game finished:{node.board}. Winner: {node.board.get_winner()}")
+        data.extend([(board,node.board.get_winner()) for board in acum])
 
     return data
 
@@ -51,7 +46,7 @@ def save_data(data, filename='data/othello_train_data.npz'):
     data: List of tuples (board, winner).
     filename: Name of the file to save the data.
     """
-    inputs = np.array([board.board for board, _ in data])
+    inputs = np.array([board for board, _ in data])
     labels = np.array([label for _, label in data])
     np.savez(filename, X=inputs, y=labels)
     print(f"Data saved to {filename}")

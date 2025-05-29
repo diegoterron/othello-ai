@@ -12,7 +12,7 @@ EXPLORATION_WEIGHT = 0.7
 NITER = 1000  # Number of iterations for UCT search
 
 class Node():
-    def __init__(self, board,parent=None,in_action=None):
+    def __init__(self, board,parent=None,in_action=None,model = None):
         """
         Initialize a node in the MCTS tree.
         board: The board state represented by this node. It's an instace of OthelloBoard.
@@ -25,6 +25,7 @@ class Node():
         self.visits = 0
         self.reward = 0
         self.in_action = in_action
+        self.model = model
 
 
 
@@ -68,16 +69,17 @@ class Node():
                 selected_move = None
 
         new_board_state = self.board.simulate_move(self.board.board ,selected_move[0], selected_move[1],self.board.get_turn())
-        new_board = OthelloBoard(board=new_board_state, turn=1 if self.board.get_turn() == 2 else 2, winner=self.board.get_winner())
+        new_board = OthelloBoard(board=new_board_state, turn=1 if self.board.get_turn() == 2 else 2)
         new_node = Node(new_board, parent=self, in_action=selected_move)
         self.children.append(new_node)
         return new_node
     
     def default_policy(self):
         """
-        This will be the neural network evaluation of the board state.
-        For now, we will simply return a random value.
+        Use a neural network to evaluate the board state or return a random value.
         """
+        if self.model is not None:
+            return self.model.predict(self.board.board)
         return np.random.rand()
     
     def backup(self, reward):

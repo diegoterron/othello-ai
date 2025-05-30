@@ -79,7 +79,8 @@ class Node():
         Use a neural network to evaluate the board state or return a random value. If no Neural Network is provided, use the traditional default policy implementation
         """
         if self.model is not None:
-            return self.model.predict(np.expand_dims(self.board.get_board(), axis=0),verbose = 0)[0][0]
+            self.prediction =  self.model.predict(np.expand_dims(self.board.get_board(), axis=0),verbose = 0)[0][0]
+            return self.prediction
         else:
             current_board = OthelloBoard(board=self.board.board, turn=self.board.get_turn())
             while current_board.is_game_over() is False:

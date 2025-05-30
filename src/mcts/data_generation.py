@@ -34,7 +34,7 @@ def generate_data(num_games=100,UCT_depth=100,useModel=False):
             else:
                 node = bestChild
                 if useModel:
-                    acum.append((node.board.board,node.default_policy()))  # Store this node and it's label
+                    acum.append((node.board.board,node.prediction))  # Store this node and it's label
                 else:
                     acum.append(node.board.board)  # Store this node's board state
         

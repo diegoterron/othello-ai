@@ -3,6 +3,7 @@ import os
 
 # Add the parent directory to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress TensorFlow warnings
 
 import numpy as np
 from src.board.othello_board import OthelloBoard
@@ -27,7 +28,7 @@ def generate_data(num_games=100,UCT_depth=100,useModel=False):
 
         # Perform MCTS to get a sample tree
         while node.board.is_game_over() is False:
-            bestChild = node.UCT_search(UCT_depth)
+            bestChild = node.UCT_search(UCT_depth,useModel)
             if bestChild is None: ## The player has no legal moves
                 board = OthelloBoard(board=node.board.board, turn=1 if node.board.get_turn() == 2 else 2) 
                 node = Node(board, parent=node, in_action=None, model=model)
@@ -45,7 +46,7 @@ def generate_data(num_games=100,UCT_depth=100,useModel=False):
             winner = node.board.get_winner()
             data.extend([(b,winner) for b in acum])
         else:
-            print(f"Game finished:{node.board}. Winner: {node.board.get_winner()}. Model used.")
+            print(f"Game finished:{node.board}. Model used.")
             data.extend([(b, dp) for b,dp in acum])
 
     return data

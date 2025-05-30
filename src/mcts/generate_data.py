@@ -1,6 +1,8 @@
 from data_generation import generate_data, save_data
 import os
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress TensorFlow warnings
+
 if __name__ == "__main__":
     
     FILENAME = 'data/othello_train_data_model_enhaced.npz'

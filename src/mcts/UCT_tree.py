@@ -26,18 +26,38 @@ class Node():
         self.reward = 0
         self.in_action = in_action
         self.model = model
+        self.prior_probs = {}
 
 
 
     def is_fully_expanded(self):
+        self.board.update_available_moves()
         return len(self.children) == len(self.board.get_available_moves())
 
 
 
-    def best_child(self,ew=EXPLORATION_WEIGHT):
+    def best_child(self, ew=EXPLORATION_WEIGHT):
         if not self.children:
             return None
-        return max(self.children, key=lambda child: child.reward / child.visits + ew * np.sqrt(2 * np.log(self.visits) / child.visits))
+
+        best_score = float('-inf')
+        best = None
+
+        total_visits = self.visits
+        for child in self.children:
+            s1 = child.reward / child.visits if child.visits > 0 else 0
+
+            # Modify the standard UCT formula as they did in alpha-zero
+            # p is the prior probability of the action leading to this child. If in the root node, noise have been applied
+            p = self.prior_probs.get(child.in_action, 1 / len(self.children))
+            s2 = ew * p * np.sqrt(total_visits) / (1 + child.visits)
+            score = s1 + s2
+
+            if score > best_score:
+                best_score = score
+                best = child
+
+        return best
 
 
 
@@ -105,10 +125,22 @@ class Node():
             reward = -reward  # In a zero-sum game, the reward for the parent is the negative of the child's reward
             current_node = current_node.parent
 
-    def UCT_search(self,iters=NITER):
+    def apply_dirichlet_noise(self, epsilon=0.25, alpha=0.3):
+        available_moves = self.board.get_available_moves()
+        noise = np.random.dirichlet([alpha] * len(available_moves))
+        self.prior_probs = {
+            move: (1 - epsilon) * (1 / len(available_moves)) + epsilon * noise[i]
+            for i, move in enumerate(available_moves)
+        }
+
+    def UCT_search(self,iters=NITER,noisy=False):
         """
         Perform UCT search for a given number of iterations.
         """
+        self.board.update_available_moves()
+        if self.board.get_available_moves() and noisy:
+            self.apply_dirichlet_noise()
+
         for _ in range(iters):
             leaf = self.tree_policy()
             reward = leaf.default_policy()

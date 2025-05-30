@@ -3,7 +3,7 @@ import os
 
 if __name__ == "__main__":
     
-    FILENAME = 'data/othello_train_data.npz'
+    FILENAME = 'data/othello_train_data_model_enhaced.npz'
     if(os.path.exists(FILENAME)):
         inpt = ""
         while inpt.lower() != 'y' and inpt.lower() !='n':
@@ -12,6 +12,6 @@ if __name__ == "__main__":
                 print("Exiting without generating data.")
                 exit(0)
 
-    data = generate_data(num_games=1000,UCT_depth=20)
+    data = generate_data(num_games=1,UCT_depth=10,useModel=True)
     save_data(data, filename=FILENAME)
     

@@ -9,7 +9,7 @@ from src.board.othello_board import OthelloBoard
 from src.mcts.UCT_tree import Node
 from tensorflow import keras
 
-MODEL_PATH = 'models/untrained_model.keras'
+MODEL_PATH = 'models/model_v3.keras'
 
 def generate_data(num_games=100,UCT_depth=100,useModel=False):
     """
@@ -33,10 +33,20 @@ def generate_data(num_games=100,UCT_depth=100,useModel=False):
                 node = Node(board, parent=node, in_action=None, model=model)
             else:
                 node = bestChild
-                acum.append(node.board.board)  # Store the board state for this node
-        node.board.check_game_over()
-        print(f"Game finished:{node.board}. Winner: {node.board.get_winner()}")
-        data.extend([(board,node.board.get_winner()) for board in acum])
+                if useModel:
+                    acum.append((node.board.board,node.default_policy()))  # Store this node and it's label
+                else:
+                    acum.append(node.board.board)  # Store this node's board state
+        
+        
+        if not useModel:
+            node.board.check_game_over()
+            print(f"Game finished:{node.board}. Winner: {node.board.get_winner()}")
+            winner = node.board.get_winner()
+            data.extend([(b,winner) for b in acum])
+        else:
+            print(f"Game finished:{node.board}. Winner: {node.board.get_winner()}. Model used.")
+            data.extend([(b, dp) for b,dp in acum])
 
     return data
 

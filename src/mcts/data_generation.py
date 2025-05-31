@@ -21,7 +21,7 @@ def generate_data(num_games=100,UCT_depth=100,useModel=False):
     model = keras.models.load_model(MODEL_PATH) if useModel else None
     data = []
     print(f'Model {"loaded" if useModel else "usage is not active"}. Generating data...')
-    for _ in range(num_games):
+    for i in range(num_games):
         board = OthelloBoard()
         acum= []
         node = Node(board, model=model)
@@ -42,11 +42,11 @@ def generate_data(num_games=100,UCT_depth=100,useModel=False):
         
         if not useModel:
             node.board.check_game_over()
-            print(f"Game finished:{node.board}. Winner: {node.board.get_winner()}")
+            print(f"Game {i} finished:{node.board}. Winner: {node.board.get_winner()}")
             winner = node.board.get_winner()
             data.extend([(b,winner) for b in acum])
         else:
-            print(f"Game finished:{node.board}. Model used.")
+            print(f"Game {i} finished:{node.board}. Model used.")
             data.extend([(b, dp) for b,dp in acum])
 
     return data

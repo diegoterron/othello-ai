@@ -1,6 +1,8 @@
 import numpy as np
+import random
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
+from collections import deque
 import os
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress TensorFlow warnings
@@ -13,8 +15,16 @@ from keras import layers
 #============================================================#============================================================#
 
 DATAFILE = 'othello_train_data_model_enhanced.npz'
-BASE_MODEL = 'model_v3.keras'
+BASE_MODEL = 'model_v3.keras' 
+PRINT_DATA_SAMPLE = True   
 
+EPOCHS = 1000
+BATCH_SIZE = 32
+
+BUFFER_SIZE = 50000
+USE_REPLAY_BUFFER = True  # Set to True to use replay buffer, False to train directly from data
+
+#============================================================#============================================================#
 NETWORK_ARCHITECTURE = [
     layers.Input(shape=(8,8,1)),
 
@@ -44,7 +54,6 @@ OPTIMIZER = keras.optimizers.Adam(learning_rate=0.001)
 CALLBACKS = [keras.callbacks.EarlyStopping(patience=10, restore_best_weights=True),
             keras.callbacks.ReduceLROnPlateau(monitor='val_r2_score',factor=0.5,  patience=5,  min_lr=1e-5,verbose=1)]
 
-PRINT_DATA_SAMPLE = True  
 
 #============================================================#============================================================#
 #============================================================#============================================================#
@@ -76,15 +85,41 @@ def build_model(architecture=NETWORK_ARCHITECTURE, optimizer=OPTIMIZER):
     model.compile(optimizer=optimizer, loss='mse', metrics=['r2_score'])
     return model
 
-def train_model(model, X_train, y_train, callbacks=CALLBACKS, epochs=100):
+def train_model(model, X_train, y_train, callbacks=CALLBACKS, epochs=EPOCHS):
     history = model.fit(
         X_train, y_train,
         validation_split=0.2,
         epochs=epochs,
-        batch_size=32,
+        batch_size=BATCH_SIZE,
         callbacks=callbacks,
     )
     return history
+
+def populate_replay_buffer(X, y, ):
+    replay_buffer = deque(maxlen=BUFFER_SIZE)
+    for i in range(len(X)):
+        replay_buffer.append((X[i], y[i]))
+
+    return replay_buffer
+
+def train_from_replay_buffer(model, replay_buffer, epochs=EPOCHS, callbacks=CALLBACKS):
+
+        Xy = random.sample(replay_buffer, BATCH_SIZE*epochs)
+        X,y = zip(*Xy)
+        X=np.array(X)
+        y=np.array(y)
+        
+        h =model.fit(
+            X, y,
+            epochs=EPOCHS,
+            batch_size=BATCH_SIZE,
+            validation_split=0.2,
+            callbacks=callbacks)
+        
+        return h
+
+
+
 
 def evaluate_model(model, X_val, y_val):
     results = model.evaluate(X_val, y_val, verbose=0)
@@ -94,15 +129,28 @@ def evaluate_model(model, X_val, y_val):
     return results
 
 def save_model(model, filename):
-    model.save(f'../../models/{filename}')
+    model.save(f'models/{filename}')
     print(f"Model saved to {filename}")
 
 def main(verbose= False):
     X, y = load_data()
     X_train, X_val, y_train, y_val = preprocess_data(X, y, verbose=verbose)
 
-    model = build_model(NETWORK_ARCHITECTURE, OPTIMIZER) if not BASE_MODEL else keras.models.load_model(f'models/{BASE_MODEL}')
-    history = train_model(model, X_train, y_train, CALLBACKS)
+    if BASE_MODEL:
+        print(f"Loading base model: {BASE_MODEL}")
+        model = keras.models.load_model(f'models/{BASE_MODEL}', compile = False)
+        model.compile(optimizer=OPTIMIZER, loss='mse', metrics=['r2_score'])
+    else:
+        model = build_model(NETWORK_ARCHITECTURE, OPTIMIZER)
+
+    if USE_REPLAY_BUFFER:
+        print("Populating replay buffer...")
+        replay_buffer = populate_replay_buffer(X_train, y_train)
+        print(f"Replay buffer populated with {len(replay_buffer)} samples.")
+        print("Training from replay buffer...")
+        history = train_from_replay_buffer(model, replay_buffer, epochs=EPOCHS, callbacks=CALLBACKS)
+    else:
+        history = train_model(model, X_train, y_train, CALLBACKS) 
 
     evaluate_model(model, X_val, y_val)
     inpt = ""

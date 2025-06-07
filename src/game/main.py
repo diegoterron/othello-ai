@@ -1,14 +1,26 @@
 import random
-from src.mcts.UCT_tree import Node 
 import pygame
 import sys
+import os
 import numpy as np
 import tensorflow as tf
+
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress TensorFlow warnings
+
 from src.board.othello_board import OthelloBoard
 from src.mcts.UCT_tree import Node, EXPLORATION_WEIGHT
 
+import numpy as np
+from src.board.othello_board import OthelloBoard
+from src.mcts.UCT_tree import Node
+from tensorflow import keras
+
+MODEL_PATH = 'models/model_v3.keras'
+
 # replace with None to test interface, since model is very laggy
-model = tf.keras.models.load_model("./models/model_v4.keras") 
+model = tf.keras.models.load_model(MODEL_PATH) 
 
 SIZE = 8
 WIDTH, HEIGHT = 640, 640

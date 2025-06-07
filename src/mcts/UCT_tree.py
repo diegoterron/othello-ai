@@ -5,7 +5,7 @@ import os
 # Add the parent directory to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.board.othello_board import OthelloBoard
+from board.othello_board import OthelloBoard
 
 
 EXPLORATION_WEIGHT = 0.5

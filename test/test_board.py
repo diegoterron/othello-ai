@@ -33,41 +33,15 @@ print_board_state(board, "Initial")
 board.print_board(board.get_board(), "After Initial Setup")
 
 # Find and play one available move
-available_moves = list(zip(*((board.board == 3).nonzero())))
-if available_moves:
-    row, col = available_moves[0]
-    board.place_disc(row, col, board.get_turn())
-    board.print_board(board.get_board(),f"After Player {2 if board.get_turn() == 1 else 1} Move at ({row}, {col})")
-
-available_moves = list(zip(*((board.board == 3).nonzero())))
-if available_moves:
-    row, col = available_moves[2]
-    board.place_disc(row, col, board.get_turn())
-    board.print_board(board.get_board(),f"After Player {2 if board.get_turn() == 1 else 1} Move at ({row}, {col})")
-
-available_moves = list(zip(*((board.board == 3).nonzero())))
-if available_moves:
-    row, col = available_moves[2]
-    board.place_disc(row, col, board.get_turn())
-    board.print_board(board.get_board(),f"After Player {2 if board.get_turn() == 1 else 1} Move at ({row}, {col})")
-
-available_moves = list(zip(*((board.board == 3).nonzero())))
-if available_moves:
-    row, col = available_moves[2]
-    board.place_disc(row, col, board.get_turn())
-    board.print_board(board.get_board(),f"After Player {2 if board.get_turn() == 1 else 1} Move at ({row}, {col})")
-
-available_moves = list(zip(*((board.board == 3).nonzero())))
-if available_moves:
-    row, col = available_moves[2]
-    board.place_disc(row, col, board.get_turn())
-    board.print_board(board.get_board(),f"After Player {2 if board.get_turn() == 1 else 1} Move at ({row}, {col})")
-
-available_moves = list(zip(*((board.board == 3).nonzero())))
-if available_moves:
-    row, col = available_moves[2]
-    board.place_disc(row, col, board.get_turn())
-    board.print_board(board.get_board(),f"After Player {2 if board.get_turn() == 1 else 1} Move at ({row}, {col})")
+while board.get_winner() == None:
+    print(board.get_winner())
+    available_moves = list(zip(*((board.board == 3).nonzero())))
+    if available_moves:
+        row, col = available_moves[0]
+        board.place_disc(row, col, board.get_turn())
+        board.print_board(board.get_board(),f"After Player {2 if board.get_turn() == 1 else 1} Move at ({row}, {col})")
+    print(board.get_winner())
+    print(board.check_game_over())
 
 # Print winner (should be 0 until board is full)
 print("\nWinner:", board.get_winner())

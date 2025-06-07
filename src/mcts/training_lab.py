@@ -15,7 +15,7 @@ from keras import layers
 #============================================================#============================================================#
 
 DATAFILE = 'othello_train_data_model_enhanced.npz'
-BASE_MODEL = 'model_v3.keras' 
+BASE_MODEL = 'model_v3.keras' #Set to None to train from scratch, or provide a filename to load a pre-trained model
 PRINT_DATA_SAMPLE = True   
 
 EPOCHS = 1000

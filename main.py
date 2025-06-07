@@ -38,7 +38,7 @@ def get_best_move(board: OthelloBoard, model) -> tuple:
 
     try:
         root = Node(board, model=model)
-        best_child = root.UCT_search(noisy=True)
+        best_child = root.UCT_search(iters=100)
         return best_child.in_action if best_child else random.choice(moves)
     except Exception as e:
         print("MCTS failed:", e)
@@ -131,7 +131,6 @@ def show_winner(winner, board):
     img = render_text_with_outline(font, text, WHITE, BLACK, outline_width=2)
     screen.blit(img, (WIDTH // 2 - img.get_width() // 2, HEIGHT // 2 - img.get_height() // 2))
     pygame.display.flip()
-    pygame.time.wait(300000)
 
 def main():
     board = OthelloBoard()
@@ -149,7 +148,7 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-                break
+                
 
             if board.get_turn() == human_color and event.type == pygame.MOUSEBUTTONDOWN:
                 row, col = get_cell(pygame.mouse.get_pos())
@@ -167,10 +166,13 @@ def main():
         if board.is_game_over():
             board.check_game_over()
             show_winner(board.get_winner(), board)
-            pygame.time.wait(2000)
-            running = False
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+            
     
     pygame.quit()
+    sys.exit()
 
 
 if __name__ == "__main__":

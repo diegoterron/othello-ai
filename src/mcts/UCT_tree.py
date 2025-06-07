@@ -48,7 +48,7 @@ class Node():
             s1 = child.reward / child.visits if child.visits > 0 else 0
 
             # Modify the standard UCT formula as they did in alpha-zero
-            # p is the prior probability of the action leading to this child. If in the root node, noise have been applied
+            # p is the prior probability of the action leading to this child. If in the root node, noise has been applied
             p = self.prior_probs.get(child.in_action, 1 / len(self.children))
             s2 = ew * p * np.sqrt(total_visits) / (1 + child.visits)
             score = s1 + s2
@@ -106,7 +106,7 @@ class Node():
             while current_board.is_game_over() is False:
                 available_moves = current_board.get_available_moves()
                 if not available_moves:
-                    new_board = OthelloBoard(board=current_board, turn=1 if current_board.get_turn() == 2 else 2)
+                    new_board = OthelloBoard(board=current_board.board, turn=1 if current_board.get_turn() == 2 else 2)
                 else:
                     move = available_moves[np.random.choice([i for i,_ in enumerate(available_moves)])]
                     new_board_state = current_board.simulate_move(current_board.board, move[0], move[1], current_board.get_turn())

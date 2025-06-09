@@ -14,29 +14,25 @@ from keras import layers
 #============================================================#============================================================#
 #============================================================#============================================================#
 
-DATAFILE = 'othello_train_data_model_enhanced.npz'
-BASE_MODEL = 'model_v3.keras' 
+DATAFILE = 'othello_train_data_2.npz'
+BASE_MODEL = '' 
 PRINT_DATA_SAMPLE = True   
 
 EPOCHS = 1000
 BATCH_SIZE = 32
 
 BUFFER_SIZE = 50000
-USE_REPLAY_BUFFER = True  # Set to True to use replay buffer, False to train directly from data
+USE_REPLAY_BUFFER = False  # Set to True to use replay buffer, False to train directly from data
 
 #============================================================#============================================================#
 NETWORK_ARCHITECTURE = [
-    layers.Input(shape=(8,8,1)),
+    layers.Input(shape=(8, 8, 1)),
 
-    layers.Conv2D(32, (3, 3), padding='same'),
-    layers.BatchNormalization(),
-    layers.ReLU(),
-    
-    layers.Conv2D(32, (3, 3), padding='same'),
+    layers.Conv2D(32, (3, 3), padding='same', kernel_regularizer=keras.regularizers.l2(0.001)),
     layers.BatchNormalization(),
     layers.ReLU(),
 
-    layers.Conv2D(32, (3, 3), padding='same'),
+    layers.Conv2D(32, (3, 3), padding='same', kernel_regularizer=keras.regularizers.l2(0.001)),
     layers.BatchNormalization(),
     layers.ReLU(),
 
@@ -44,10 +40,11 @@ NETWORK_ARCHITECTURE = [
     layers.Dense(64, kernel_regularizer=keras.regularizers.l2(0.001)),
     layers.BatchNormalization(),
     layers.ReLU(),
-
+    layers.Dropout(0.3),
 
     layers.Dense(1, activation='tanh')
-    ]
+]
+
 
 OPTIMIZER = keras.optimizers.Adam(learning_rate=0.001)
 
@@ -64,6 +61,9 @@ def load_data(filename=DATAFILE):
     data = np.load(f'data/{filename}' ,allow_pickle=True)
     X, y = data['X'], data['y']
     X = np.where(X == 3, 0, X)
+    for i in range(len(X)):
+        if i % 2 == 0:  # Even indices are player 1's turn
+            X[i] = np.where(X[i] == 1, 2, np.where(X[i] == 2, 1, 0))
     return X, y
 
 def preprocess_data(X, y,verbose=False):

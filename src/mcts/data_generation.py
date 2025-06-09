@@ -37,14 +37,19 @@ def generate_data(num_games=100,UCT_depth=100,useModel=False):
                 if useModel:
                     acum.append((node.board.board,node.prediction))  # Store this node and it's label
                 else:
-                    acum.append(node.board.board)  # Store this node's board state
+                    acum.append((node.board.board,node.board.get_turn()))  # Store this node's board state
         
         
         if not useModel:
             node.board.check_game_over()
             print(f"Game {i} finished:{node.board}. Winner: {node.board.get_winner()}")
             winner = node.board.get_winner()
-            data.extend([(b,winner) for b in acum])
+            turn = node.board.get_turn()
+            for b,t in acum:
+                if t == turn:
+                    data.append((b, winner))
+                else:
+                    data.append((b, -winner))
         else:
             print(f"Game {i} finished:{node.board}. Model used.")
             data.extend([(b, dp) for b,dp in acum])

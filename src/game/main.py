@@ -17,7 +17,7 @@ from src.board.othello_board import OthelloBoard
 from src.mcts.UCT_tree import Node
 from tensorflow import keras
 
-MODEL_PATH = 'models/model_v3.keras'
+MODEL_PATH = 'models/model_v5.keras'
 
 # replace with None to test interface, since model is very laggy
 model = tf.keras.models.load_model(MODEL_PATH) 

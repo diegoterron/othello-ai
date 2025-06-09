@@ -14,13 +14,13 @@ from keras import layers
 #============================================================#============================================================#
 #============================================================#============================================================#
 
-DATAFILE = 'othello_train_data_model_enhanced.npz'
-BASE_MODEL = 'model_v3.keras' #Set to None to train from scratch, or provide a filename to load a pre-trained model
+DATAFILE = 'othello_train_data_2.npz'
+BASE_MODEL = None #Set to None to train from scratch, or provide a filename to load a pre-trained model
 DATAFILE = 'othello_train_data_2.npz'
 BASE_MODEL = '' 
 PRINT_DATA_SAMPLE = True   
 
-EPOCHS = 1000
+EPOCHS = 300
 BATCH_SIZE = 32
 
 BUFFER_SIZE = 50000
@@ -30,11 +30,11 @@ USE_REPLAY_BUFFER = False  # Set to True to use replay buffer, False to train di
 NETWORK_ARCHITECTURE = [
     layers.Input(shape=(8, 8, 1)),
 
-    layers.Conv2D(32, (3, 3), padding='same', kernel_regularizer=keras.regularizers.l2(0.001)),
+    layers.Conv2D(64, (3, 3), padding='same', kernel_regularizer=keras.regularizers.l2(0.001)),
     layers.BatchNormalization(),
     layers.ReLU(),
 
-    layers.Conv2D(32, (3, 3), padding='same', kernel_regularizer=keras.regularizers.l2(0.001)),
+    layers.Conv2D(64, (3, 3), padding='same', kernel_regularizer=keras.regularizers.l2(0.001)),
     layers.BatchNormalization(),
     layers.ReLU(),
 
@@ -66,7 +66,12 @@ def load_data(filename=DATAFILE):
     for i in range(len(X)):
         if i % 2 == 0:  # Even indices are player 1's turn
             X[i] = np.where(X[i] == 1, 2, np.where(X[i] == 2, 1, 0))
-    return X, y
+    
+    return X,y
+
+import numpy as np
+
+
 
 def preprocess_data(X, y,verbose=False):
     scaler = MinMaxScaler(feature_range=(-1, 1))

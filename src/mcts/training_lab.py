@@ -38,15 +38,11 @@ NETWORK_ARCHITECTURE = [
     layers.BatchNormalization(),
     layers.ReLU(),
 
-    layers.Conv2D(64, (3, 3), padding='same', kernel_regularizer=keras.regularizers.l2(0.001)),
-    layers.BatchNormalization(),
-    layers.ReLU(),
-
     layers.Flatten(),
-    layers.Dense(128, kernel_regularizer=keras.regularizers.l2(0.001)),
+    layers.Dense(64, kernel_regularizer=keras.regularizers.l2(0.001)),
     layers.BatchNormalization(),
     layers.ReLU(),
-    layers.Dropout(0.5),
+    layers.Dropout(0.3),
 
     layers.Dense(1, activation='tanh')
 ]
